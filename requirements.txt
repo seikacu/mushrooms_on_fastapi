@@ -1,0 +1,7 @@
+aiosqlite
+annotated-types
+fastapi
+pydantic
+pydantic-settings
+SQLAlchemy
+uvicorn
