@@ -1,125 +1,68 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
-from src.database import MushroomModel
-from src.repository import MushroomRepository
-from src.schemas import Mushroom, MushroomAdd
+from repository import BasketRepository, MushroomRepository
+from schemas import Basket, BasketCreate, Mushroom, MushroomAdd, MushroomUpdate
 
 router_mushrooms = APIRouter(
     prefix="/mushrooms",
     tags=["Грибы"],
 )
 
+router_baskets = APIRouter(
+    prefix="/baskets",
+    tags=["Корзинки"],
+)
+
+
 all_routers = [
     router_mushrooms,
+    router_baskets,
 ]
 
 
 # Эндпоинты для работы с грибами
-@router_mushrooms.post("")
+@router_mushrooms.post("/add")
 async def add_mushroom(mushroom: Annotated[MushroomAdd, Depends()]) -> Mushroom:
     mushroom_db = await MushroomRepository.add_one(mushroom)
     return mushroom_db
 
 
-# @router_mushrooms.put("/mushrooms/{mushroom_id}", response_model=Mushroom)
-# def update_mushroom(
-#     mushroom_id: int, mushroom: Mushroom, db: SessionLocal = Depends(get_db)
-# ):
-#     db_mushroom = (
-#         db.query(MushroomModel).filter(MushroomModel.id == mushroom_id).first()
-#     )
-#     if db_mushroom is None:
-#         raise HTTPException(status_code=404, detail="Mushroom not found.")
-#     for key, value in mushroom.dict().items():
-#         setattr(db_mushroom, key, value)
-#     db.commit()
-#     return Mushroom.from_orm(db_mushroom)
+@router_mushrooms.put("/update/{mushroom_id}")
+async def update_mushroom(
+    mushroom_id: int, mushroom: Annotated[MushroomUpdate, Depends()]
+) -> Mushroom:
+    mushroom_db = await MushroomRepository.update_one(mushroom_id, mushroom)
+    return mushroom_db
 
 
-# @router_mushrooms.get("/mushrooms/{mushroom_id}", response_model=Mushroom)
-# def get_mushroom(mushroom_id: int, db: SessionLocal = Depends(get_db)):
-#     db_mushroom = (
-#         db.query(MushroomModel).filter(MushroomModel.id == mushroom_id).first()
-#     )
-#     if db_mushroom is None:
-#         raise HTTPException(status_code=404, detail="Mushroom not found.")
-#     return Mushroom.from_orm(db_mushroom)
+@router_mushrooms.get("/get/{mushroom_id}")
+async def get_mushroom(mushroom_id: int) -> Mushroom:
+    mushroom_db = await MushroomRepository.get_one(mushroom_id)
+    return mushroom_db
 
 
-# # Эндпоинты для работы с корзинками
-# @router.post("/baskets/", response_model=Basket)
-# def create_basket(basket: Basket, db: SessionLocal = Depends(get_db)):
-#     db_basket = BasketModel(**basket.dict())
-#     db.add(db_basket)
-#     db.commit()
-#     db.refresh(db_basket)
-#     return Basket.from_orm(db_basket)
+# Эндпоинты для работы с корзинками
+@router_baskets.post("/create")
+async def create_basket(basket: Annotated[BasketCreate, Depends()]) -> Basket:
+    basket_db = await BasketRepository.create_one(basket)
+    return basket_db
 
 
-# @router.post("/baskets/{basket_id}/mushrooms/", response_model=Basket)
-# def add_mushroom_to_basket(
-#     basket_id: int, mushroom_id: int, db: SessionLocal = Depends(get_db)
-# ):
-#     db_basket = db.query(BasketModel).filter(BasketModel.id == basket_id).first()
-#     db_mushroom = (
-#         db.query(MushroomModel).filter(MushroomModel.id == mushroom_id).first()
-#     )
-
-#     if db_basket is None:
-#         raise HTTPException(status_code=404, detail="Basket not found.")
-#     if db_mushroom is None:
-#         raise HTTPException(status_code=404, detail="Mushroom not found.")
-
-#     # Проверка вместимости корзинки
-#     current_weight = sum(m.weight for m in db_basket.mushrooms)
-#     if current_weight + db_mushroom.weight > db_basket.capacity:
-#         raise HTTPException(
-#             status_code=400, detail="Not enough capacity in the basket."
-#         )
-
-#     # Добавление гриба в корзинку
-#     db_basket.mushrooms.append(db_mushroom)
-#     db.commit()
-#     return Basket.from_orm(db_basket)
+@router_baskets.post("/{basket_id}/mushrooms/")
+async def put_mushroom_to_basket(basket_id: int, mushroom_id: int) -> Basket:
+    db_basket = await BasketRepository.put_mushroom(basket_id, mushroom_id)
+    return db_basket
 
 
-# @router.delete("/baskets/{basket_id}/mushrooms/{mushroom_id}", response_model=Basket)
-# def remove_mushroom_from_basket(
-#     basket_id: int, mushroom_id: int, db: SessionLocal = Depends(get_db)
-# ):
-#     db_basket = db.query(BasketModel).filter(BasketModel.id == basket_id).first()
-
-#     if db_basket is None:
-#         raise HTTPException(status_code=404, detail="Basket not found.")
-
-#     # Поиск гриба в корзинке
-#     mushroom_to_remove = next(
-#         (m for m in db_basket.mushrooms if m.id == mushroom_id), None
-#     )
-
-#     if mushroom_to_remove is None:
-#         raise HTTPException(status_code=404, detail="Mushroom not found in the basket.")
-
-#     # Удаление гриба из корзинки
-#     db_basket.mushrooms.remove(mushroom_to_remove)
-#     db.commit()
-#     return Basket.from_orm(db_basket)
+@router_baskets.delete("/{basket_id}/mushrooms/{mushroom_id}")
+async def remove_mushroom_from_basket(basket_id: int, mushroom_id: int) -> Basket:
+    db_basket = await BasketRepository.del_mushroom(basket_id, mushroom_id)
+    return db_basket
 
 
-# @router.get("/baskets/{basket_id}", response_model=Basket)
-# def get_basket(basket_id: int, db: SessionLocal = Depends(get_db)):
-#     db_basket = db.query(BasketModel).filter(BasketModel.id == basket_id).first()
-#     if db_basket is None:
-#         raise HTTPException(status_code=404, detail="Basket not found.")
-
-#     # Получение грибов из корзинки
-#     mushrooms = (
-#         db.query(MushroomModel)
-#         .filter(MushroomModel.id.in_([mushroom.id for mushroom in db_basket.mushrooms]))
-#         .all()
-#     )
-
-#     # Создание Pydantic модели корзинки с грибами
-#     return Basket.from_orm(db_basket)
+@router_baskets.get("/{basket_id}")
+async def get_basket(basket_id: int):
+    db_basket = await BasketRepository.get_mushrooms(basket_id)
+    return db_basket
