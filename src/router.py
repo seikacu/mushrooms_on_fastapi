@@ -63,6 +63,6 @@ async def remove_mushroom_from_basket(basket_id: int, mushroom_id: int) -> Baske
 
 
 @router_baskets.get("/{basket_id}")
-async def get_basket(basket_id: int):
+async def get_basket(basket_id: int) -> Basket:
     db_basket = await BasketRepository.get_mushrooms(basket_id)
     return db_basket
