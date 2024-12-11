@@ -1,13 +1,9 @@
-import os
-import sys
-
-from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-from database import create_tables, delete_tables
-# from router import
+from fastapi import FastAPI
 
-sys.path.insert(1, os.path.join(sys.path[0], ".."))
+from src.database import create_tables, delete_tables
+from src.router import all_routers
 
 
 @asynccontextmanager
@@ -20,5 +16,7 @@ async def lifespan(app: FastAPI):
     print("Выключение")
 
 
-app = FastAPI(lifespan=lifespan)
-# app.include_router()
+app = FastAPI(title="Поход за грибами", lifespan=lifespan)
+
+for router in all_routers:
+    app.include_router(router)

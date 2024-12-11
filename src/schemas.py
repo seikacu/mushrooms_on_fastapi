@@ -3,12 +3,15 @@ from typing import List
 from pydantic import BaseModel, ConfigDict
 
 
-class Mushroom(BaseModel):
-    id: int
+class MushroomAdd(BaseModel):
     name: str
     edible: bool
     weight: int  # в граммах
     freshness: str
+
+
+class Mushroom(MushroomAdd):
+    id: int
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -1,9 +1,10 @@
-from sqlalchemy import ForeignKey
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
 from typing import Optional
 
-from config import settings
+from sqlalchemy import ForeignKey
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+from src.config import settings
 
 engine = create_async_engine(settings.DATABASE_URL)
 async_session_factory = async_sessionmaker(engine, expire_on_commit=False)
@@ -36,7 +37,9 @@ class BasketModel(Model):
 class BasketMushroom(Model):
     __tablename__ = "basket_mushroom"
     basket_id: Mapped[int] = mapped_column(ForeignKey("baskets.id"), primary_key=True)
-    mushroom_id: Mapped[int] = mapped_column(ForeignKey("mushrooms.id"), primary_key=True)
+    mushroom_id: Mapped[int] = mapped_column(
+        ForeignKey("mushrooms.id"), primary_key=True
+    )
 
 
 async def create_tables():
