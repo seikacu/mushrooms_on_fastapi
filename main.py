@@ -1,10 +1,9 @@
 from contextlib import asynccontextmanager
 
-import uvicorn
 from fastapi import FastAPI
 
-from database import create_tables, delete_tables
-from router import all_routers
+from src.database import create_tables, delete_tables
+from src.router import all_routers
 
 
 @asynccontextmanager
@@ -21,6 +20,3 @@ app = FastAPI(title="Поход за грибами", lifespan=lifespan)
 
 for router in all_routers:
     app.include_router(router)
-
-if __name__ == "__main__":
-    uvicorn.run(app="main:app", reload=True)

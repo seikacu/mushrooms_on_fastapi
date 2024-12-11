@@ -2,8 +2,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from repository import BasketRepository, MushroomRepository
-from schemas import Basket, BasketCreate, Mushroom, MushroomAdd, MushroomUpdate
+from src.repository import BasketRepository, MushroomRepository
+from src.schemas import Basket, BasketCreate, Mushroom, MushroomAdd, MushroomUpdate
 
 router_mushrooms = APIRouter(
     prefix="/mushrooms",

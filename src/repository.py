@@ -1,8 +1,8 @@
 from fastapi import HTTPException
 from sqlalchemy import select
 
-from database import BasketModel, MushroomModel, async_session_factory
-from schemas import BasketCreate, MushroomAdd, MushroomUpdate
+from src.database import BasketModel, MushroomModel, async_session_factory
+from src.schemas import BasketCreate, MushroomAdd, MushroomUpdate
 
 
 class MushroomRepository:
