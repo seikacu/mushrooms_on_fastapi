@@ -1,10 +1,13 @@
+from typing import List
+
 from sqlalchemy import ForeignKey
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from src.config import settings
 
-engine = create_async_engine(settings.DATABASE_URL, echo=False)
+engine: AsyncEngine = create_async_engine(settings.DATABASE_URL, echo=False)
 async_session_factory = async_sessionmaker(engine, expire_on_commit=False)
 
 
@@ -36,7 +39,7 @@ class BasketModel(Model):
     )
 
 
-MushroomModel.baskets: Mapped[list["BasketModel"]] = relationship(
+MushroomModel.baskets: Mapped[List["BasketModel"]] = relationship(
     "BasketModel", secondary="basket_mushroom", back_populates="mushrooms"
 )
 
@@ -49,11 +52,11 @@ class BasketMushroom(Model):
     )
 
 
-async def create_tables():
+async def create_tables() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Model.metadata.create_all)
 
 
-async def delete_tables():
+async def delete_tables() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Model.metadata.drop_all)

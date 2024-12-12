@@ -50,7 +50,7 @@ async def create_basket(basket: Annotated[BasketCreate, Depends()]) -> Basket:
     return basket_db
 
 
-@router_baskets.post("/{basket_id}/mushrooms/")
+@router_baskets.post("/{basket_id}/mushrooms")
 async def put_mushroom_to_basket(basket_id: int, mushroom_id: int) -> Basket:
     db_basket = await BasketRepository.put_mushroom(basket_id, mushroom_id)
     return db_basket

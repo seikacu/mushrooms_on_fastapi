@@ -1,7 +1,12 @@
 from fastapi import HTTPException
 from sqlalchemy import select
 
-from src.database import BasketModel, MushroomModel, async_session_factory
+from src.database import (
+    BasketModel,
+    BasketMushroom,
+    MushroomModel,
+    async_session_factory,
+)
 from src.schemas import BasketCreate, MushroomAdd, MushroomUpdate
 
 
@@ -26,6 +31,18 @@ class MushroomRepository:
                 db_mushroom = result.scalars().first()
                 if db_mushroom is None:
                     raise HTTPException(status_code=404, detail="Mushroom not found.")
+
+                # Проверка, есть ли гриб уже в корзине
+                existing_relationship = await session.execute(
+                    select(BasketMushroom).filter(
+                        BasketMushroom.mushroom_id == mushroom_id
+                    )
+                )
+                if existing_relationship.scalars().first() is not None:
+                    raise HTTPException(
+                        status_code=400, detail="Mushroom is already in a basket."
+                    )
+
                 for key, value in data.dict(exclude_unset=True).items():
                     if value is not None:
                         setattr(db_mushroom, key, value)
@@ -74,6 +91,17 @@ class BasketRepository:
                     raise HTTPException(status_code=404, detail="Basket not found.")
                 if db_mushroom is None:
                     raise HTTPException(status_code=404, detail="Mushroom not found.")
+
+                # Проверка, лежит ли гриб в другой корзине
+                existing_relationship = await session.execute(
+                    select(BasketMushroom).filter(
+                        BasketMushroom.mushroom_id == mushroom_id
+                    )
+                )
+                if existing_relationship.scalars().first() is not None:
+                    raise HTTPException(
+                        status_code=400, detail="Mushroom is already in another basket."
+                    )
 
                 # Проверка вместимости корзинки
                 current_weight = sum(m.weight for m in db_basket.mushrooms)

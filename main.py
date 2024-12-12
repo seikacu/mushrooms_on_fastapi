@@ -16,7 +16,14 @@ async def lifespan(app: FastAPI):
     print("Выключение")
 
 
-app = FastAPI(title="Поход за грибами", lifespan=lifespan)
+app = FastAPI(
+    title="Поход за грибами",
+    lifespan=lifespan,
+    description="API, чтобы сходить по грибы)",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
 
 for router in all_routers:
     app.include_router(router)
